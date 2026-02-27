@@ -28,6 +28,12 @@
     "swiper": "^12.1.2",
     "vite": "^6.2.0"
   },
+  "overrides": {
+    "@studio-freight/react-lenis": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/express-session": "^1.18.2",
