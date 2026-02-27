@@ -1,0 +1,5 @@
+{
+  "name": "SteganoPro",
+  "description": "A military-grade steganography tool with AES-256 encryption, chaotic bit mapping, and audio support.",
+  "requestFramePermissions": []
+}
