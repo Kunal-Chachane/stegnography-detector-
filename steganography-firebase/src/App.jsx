@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { supabase } from './services/supabase';
 
 import Navbar from './components/Navigation/Navbar';
+import Footer from './components/Navigation/Footer';
 import Landing from './pages/Landing';
 import Login from './components/Auth/Login';
 import Register from './components/Auth/Register';
@@ -44,7 +45,7 @@ function App() {
     <Router>
       <div className="min-h-screen bg-background text-text flex flex-col font-sans">
         <Navbar session={session} />
-        <main className="flex-grow">
+        <main className="flex-grow flex flex-col">
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
@@ -53,6 +54,7 @@ function App() {
             <Route path="/profile" element={<PrivateRoute session={session}><Profile /></PrivateRoute>} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </Router>
   );
