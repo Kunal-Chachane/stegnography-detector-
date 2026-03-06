@@ -1,14 +1,13 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signOut } from 'firebase/auth';
-import { auth } from '../../services/firebase';
+import { supabase } from '../../services/supabase';
 import { Shield, LogOut, User as UserIcon, LayoutDashboard, Fingerprint } from 'lucide-react';
 
-export default function Navbar({ user }) {
+export default function Navbar({ session }) {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
-        await signOut(auth);
+        await supabase.auth.signOut();
         navigate('/');
     };
 
@@ -26,7 +25,7 @@ export default function Navbar({ user }) {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        {user ? (
+                        {session ? (
                             <>
                                 <Link to="/dashboard" className="text-brand-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1.5 transition-colors">
                                     <LayoutDashboard className="w-4 h-4" />

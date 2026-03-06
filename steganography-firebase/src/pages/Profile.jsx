@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, db } from '../services/firebase';
+import { supabase } from '../services/supabase';
 import { User, Calendar, ShieldCheck } from 'lucide-react';
 
 export default function Profile() {
@@ -9,13 +8,17 @@ export default function Profile() {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            const user = auth.currentUser;
+            const { data: { user } } = await supabase.auth.getUser();
             if (user) {
-                const docRef = doc(db, 'users', user.uid);
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    setProfileData(docSnap.data());
-                }
+                // If there's a public profiles table, we'd query it here.
+                // For now, since Supabase Auth handles metadata directly, we can use user metadata.
+                // E.g., user.user_metadata.full_name
+                setProfileData({
+                    name: user.user_metadata?.full_name || user.user_metadata?.name || 'Unnamed Agent',
+                    email: user.email,
+                    created_at: new Date(user.created_at),
+                    role: 'user'
+                });
             }
             setLoading(false);
         };
@@ -43,7 +46,7 @@ export default function Profile() {
                             </div>
                             <div className="mt-4 text-center sm:mt-0 sm:pt-1 sm:text-left">
                                 <p className="text-sm font-medium text-brand-400">Welcome back,</p>
-                                <p className="text-2xl font-bold text-white sm:text-3xl">{profileData?.name || 'Unnamed Agent'}</p>
+                                <p className="text-2xl font-bold text-white sm:text-3xl">{profileData?.name}</p>
                                 <p className="text-sm font-medium text-brand-300 flex items-center gap-1.5 mt-2 justify-center sm:justify-start">
                                     <ShieldCheck className="w-4 h-4 text-emerald-400" />
                                     Status: Active / Clear
@@ -64,7 +67,7 @@ export default function Profile() {
                                 <Calendar className="w-4 h-4" /> Access Granted
                             </dt>
                             <dd className="mt-1 text-sm text-white sm:mt-0 sm:col-span-2">
-                                {profileData?.created_at?.toDate().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                                {profileData?.created_at?.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
                             </dd>
                         </div>
                         <div className="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-10">

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from './services/firebase';
+import { supabase } from './services/supabase';
 
 import Navbar from './components/Navigation/Navbar';
 import Landing from './pages/Landing';
@@ -10,20 +9,27 @@ import Register from './components/Auth/Register';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 
-const PrivateRoute = ({ children, user }) => {
-  return user ? children : <Navigate to="/login" />;
+const PrivateRoute = ({ children, session }) => {
+  return session ? children : <Navigate to="/login" />;
 };
 
 function App() {
-  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
       setLoading(false);
     });
-    return () => unsubscribe();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {
@@ -37,14 +43,14 @@ function App() {
   return (
     <Router>
       <div className="min-h-screen bg-background text-text flex flex-col font-sans">
-        <Navbar user={user} />
+        <Navbar session={session} />
         <main className="flex-grow">
           <Routes>
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<PrivateRoute user={user}><Dashboard /></PrivateRoute>} />
-            <Route path="/profile" element={<PrivateRoute user={user}><Profile /></PrivateRoute>} />
+            <Route path="/dashboard" element={<PrivateRoute session={session}><Dashboard /></PrivateRoute>} />
+            <Route path="/profile" element={<PrivateRoute session={session}><Profile /></PrivateRoute>} />
           </Routes>
         </main>
       </div>
